@@ -1,0 +1,39 @@
+several current tools already do real-time listening through a microphone (no MIDI required), so they work on an acoustic piano or any digital one.
+
+### Apps that listen via mic in real time
+These detect notes (and often rough timing) from the sound coming out of the instrument:
+
+- **Simply Piano**, **Skoove**, **flowkey**, **Yousician** — the most common ones. They listen through the phone/tablet mic, highlight correct/wrong notes on the score or keyboard display, and give immediate visual/audio feedback.
+- **Harmono** — explicitly built around “hears you play with real-time feedback,” works with any piano, follows the score, and flags wrong notes instantly.
+- **Opttonia** — listens to the piano (acoustic or digital) and also has hand-tracking if you want posture feedback.
+- **DeepPiano** and a few newer AI coaches — claim real-time wrong-note and rhythm detection from audio.
+
+Accuracy is good for single notes and simple textures in a quiet room. It drops with heavy pedal, dense chords, very fast passages, or background noise — exactly the limitation you would expect from audio analysis versus clean MIDI. For the short, controlled exercises that match your 3×2-style deliberate practice, it is usually sufficient.
+
+### Mapping your 3×2 method onto mic-based practice
+The core loop that worked for you is still possible:
+
+1. **Exact-ish grading**  
+   Treat a clean playthrough (all notes correct + timing within a reasonable window at the target tempo) as the “optimal” pass. Most of the apps above already color notes green/red in real time, so you get the same instantaneous “this was the wrong note” signal you had with the replay feature.
+
+2. **Progressive + spaced return of misses**  
+   Start with very short, easy exercises (limited range, simple rhythms, one hand). Only advance when you can do a streak of clean runs. Log every passage or measure that fails and force it back into the queue on a schedule (your 3/8/25 + overnight pattern still works). Most apps do not automate this well, so you will probably need a simple external tracker or notebook for the weak spots — the same way you controlled the review schedule in the sliding-puzzle trainer.
+
+3. **Hide the crutches later**  
+   Once a difficulty band is solid with the score fully visible, practice the same material with less visual support (smaller notation, fewer measure markings, or eventually from memory of the shape). Some apps have “disappearing measures” or wait-for-me modes that help force pure reading.
+
+4. **Hard mastery criterion**  
+   Require long streaks of perfect (or near-perfect) playthroughs at a given level before unlocking the next band of difficulty. The 100-in-a-row standard is ambitious but still usable if you define “perfect” realistically for audio detection.
+
+### The gap versus your custom tool
+None of the existing mic apps give you the precise, surgeon-level error localization + automated spaced-repetition scheduler + strict 100-streak gate that your 3×2 trainer had. They are closer to “good real-time feedback + progressive content” than to the fully instrumented deliberate-practice machine you built.
+
+Because you already used AI help to create a purpose-built trainer once, the same route is open here — just harder. A custom system would need:
+
+- Reliable real-time pitch + onset detection from the mic (modern libraries and models can do this reasonably well in a quiet room).
+- Score following so it knows where you are supposed to be.
+- Exact highlighting of the first wrong note or timing error.
+- Automatic logging of failed passages into a spaced-repetition queue.
+- Streak tracking and a hard mastery gate.
+
+That is more engineering than the sliding-puzzle case (audio is messier than discrete board states), but it is feasible, especially if you keep the exercises short and controlled at first.
