@@ -9,5 +9,4 @@ coverage/
 # Temporary local copy of the slidy trainer, kept for reference only (see docs/reference/slidy-trainer-features.md)
 slidysim_training/
 
-# Large audio fixtures stay out of git until we decide on LFS
-tests/fixtures/audio/*.wav
+smoke-shots/

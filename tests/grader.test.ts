@@ -121,3 +121,28 @@ group("tempo mode", () => {
     expect(g.firstError).toMatchObject({ event: i, kind: "wrong", expected: ex.events[i]!.midis[1] });
   });
 });
+
+group("wait mode, repeated pitches", () => {
+  it("counts a confident wrong note even if it was just played", () => {
+    const ex = generate(waitLevel, 11);
+    const f = new Follower(ex);
+    const first = ex.events[0]!.midis[0]!;
+    const i = ex.events.findIndex((e, k) => k > 0 && e.midis[0] !== first);
+    ex.events.forEach((e, k) => {
+      if (k === i) f.input(ev(k * 100 - 10, [first]));
+      f.input(ev(k * 100, e.midis));
+    });
+    expect(f.grade().pass).toBe(false);
+  });
+  it("ignores a low-confidence re-detection of a ringing note", () => {
+    const ex = generate(waitLevel, 11);
+    const f = new Follower(ex);
+    const first = ex.events[0]!.midis[0]!;
+    const i = ex.events.findIndex((e, k) => k > 0 && e.midis[0] !== first);
+    ex.events.forEach((e, k) => {
+      if (k === i) f.input(ev(k * 100 - 10, [first], 0.6));
+      f.input(ev(k * 100, e.midis));
+    });
+    expect(f.grade().pass).toBe(true);
+  });
+});

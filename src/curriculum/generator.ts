@@ -156,26 +156,33 @@ function spellLine(rng: Rng, positions: number[], key: Key, chromatic: number): 
 
 /**
  * Mark fingering where it isn't obvious: the first note, and every note that moves the hand
- * to a new five-finger position. Each position is fitted to the longest upcoming run of notes
- * that spans five keys or fewer.
+ * to a new position. A position covers the longest upcoming run of notes spanning a sixth or
+ * less (five fingers, stretching for the sixth); fingers spread across that span.
  */
 function addFingering(notes: ScoreNote[], hand: Hand): void {
+  const MAX_SPAN = 5;
   const singles = notes.filter((n) => n.pitches.length === 1);
   const pos = singles.map((n) => posOf(n.pitches[0]!));
-  let lo: number | undefined;
+  let win: [number, number] | undefined;
   for (let i = 0; i < singles.length; i++) {
     const p = pos[i]!;
-    if (lo !== undefined && p >= lo && p <= lo + 4) continue;
+    if (win && p >= win[0] && p <= win[1]) continue;
     let min = p;
     let max = p;
     for (let j = i + 1; j < pos.length; j++) {
       const q = pos[j]!;
-      if (Math.max(max, q) - Math.min(min, q) > 4) break;
+      if (Math.max(max, q) - Math.min(min, q) > MAX_SPAN) break;
       min = Math.min(min, q);
       max = Math.max(max, q);
     }
-    lo = hand === "R" ? min : max - 4;
-    const finger = hand === "R" ? p - lo + 1 : lo + 4 - p + 1;
+    // a narrow run still sits in a five-note position: extend it away from the thumb
+    if (max - min < 4) {
+      if (hand === "R") max = min + 4;
+      else min = max - 4;
+    }
+    win = [min, max];
+    const span = max - min;
+    const finger = 1 + Math.round(((hand === "R" ? p - min : max - p) * 4) / span);
     singles[i]!.fingering = [finger];
   }
 }

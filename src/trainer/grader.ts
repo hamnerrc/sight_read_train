@@ -150,7 +150,8 @@ export class Follower {
       }
       if (ev.midis.includes(m)) continue; // repeat of a pitch already heard in this event
       const last = this.lastHeard.get(m);
-      if (last !== undefined && e.time - last < 1500) continue; // an earlier note still ringing, re-detected
+      // an earlier note still ringing and re-detected: the detector tags those guesses below 0.8
+      if (last !== undefined && e.time - last < 1500 && e.confidence < 0.8) continue;
       if (e.confidence < this.o.minConfidence) continue;
       const expected = nearest(ev.midis.filter((_, i) => !slot.heard[i]), m);
       slot.wrong.push({ event: this.cur, kind: "wrong", expected, played: m });

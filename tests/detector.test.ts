@@ -101,3 +101,20 @@ describe("detector on synthetic piano", () => {
     expect(sure(d[0]!)).toEqual([48, 60]);
   });
 });
+
+describe("tuning probe", () => {
+  it("measures an out-of-tune A4 to within 2 cents", async () => {
+    const { peakNear } = await import("../src/audio/detector");
+    for (const a4 of [432, 440, 446]) {
+      const x = new Float32Array(sr);
+      addNote(x, sr, Math.floor(0.2 * sr), 69, 0.7, { a4 });
+      const det = new Detector(sr, { a4: 440 });
+      det.prior = () => [69];
+      for (let i = 0; i < x.length; i += 128) det.push(x.subarray(i, i + 128));
+      det.flush();
+      const f = peakNear(det.lastPost!.mag, det.lastPost!.size, sr, 440)!;
+      // the fundamental of A4 is very slightly stretched by inharmonicity; well under a cent
+      expect(Math.abs(1200 * Math.log2(f / a4))).toBeLessThan(2);
+    }
+  });
+});

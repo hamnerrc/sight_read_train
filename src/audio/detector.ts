@@ -71,6 +71,8 @@ export class Detector {
   levelDb = -120;
   /** Latest onset flux, for calibration. */
   lastFlux = 0;
+  /** Spectrum of the latest analysed attack (for the tuning calibration). */
+  lastPost?: { mag: Float64Array; size: number };
   /** Recent flux values (for the noise-floor calibration). */
   readonly fluxLog: number[] = [];
 
@@ -191,6 +193,7 @@ export class Detector {
   private analyse(s0: number, a: number, n: number, expected: number[], strongAttack: boolean): Detection {
     const size = n * 2;
     const post = magnitude(this.segment(a, n), 0, n, size);
+    this.lastPost = { mag: post, size };
     // "Before" spectrum: up to n samples before the onset, but never reaching back past the
     // previous onset (that would make the previous note look new again).
     const preEnd = s0 - Math.round(0.004 * this.sr);
@@ -335,4 +338,26 @@ export class Detector {
     }
     return { midis, confidence };
   }
+}
+
+/**
+ * Frequency of the strongest peak within ±80 cents of `nominal`, with parabolic
+ * interpolation on the log spectrum. For the tuning calibration.
+ */
+export function peakNear(mag: Float64Array, size: number, sr: number, nominal: number): number | undefined {
+  const bin = sr / size;
+  const lo = Math.floor((nominal * Math.pow(2, -80 / 1200)) / bin);
+  const hi = Math.ceil((nominal * Math.pow(2, 80 / 1200)) / bin);
+  let k = -1;
+  let v = 0;
+  for (let i = Math.max(1, lo); i <= hi && i < mag.length - 1; i++) if (mag[i]! > v) {
+    v = mag[i]!;
+    k = i;
+  }
+  if (k < 0 || v <= 0) return undefined;
+  const a = Math.log(mag[k - 1]! + 1e-12);
+  const b = Math.log(mag[k]! + 1e-12);
+  const c = Math.log(mag[k + 1]! + 1e-12);
+  const d = (0.5 * (a - c)) / (a - 2 * b + c);
+  return (k + (Number.isFinite(d) ? d : 0)) * bin;
 }
