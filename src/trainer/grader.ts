@@ -90,7 +90,8 @@ export class Follower {
   private readonly onUpdate?: (u: FollowerUpdate) => void;
   private slots: Slot[];
   private cur = 0;
-  private advancedAt = -Infinity;
+  /** When each pitch was last correctly heard (wait mode), to ignore re-detections of ringing notes. */
+  private lastHeard = new Map<number, number>();
   private firstInputMs?: number;
   private lastInputMs?: number;
   readonly inputs: InputEvent[] = [];
@@ -144,11 +145,12 @@ export class Follower {
       const k = ev.midis.findIndex((x, i) => x === m && !slot.heard[i]);
       if (k >= 0) {
         slot.heard[k] = true;
+        this.lastHeard.set(m, e.time);
         continue;
       }
       if (ev.midis.includes(m)) continue; // repeat of a pitch already heard in this event
-      const prev = this.ex.events[this.cur - 1];
-      if (prev?.midis.includes(m) && e.time - this.advancedAt < 400) continue; // the previous note still ringing / re-detected
+      const last = this.lastHeard.get(m);
+      if (last !== undefined && e.time - last < 1500) continue; // an earlier note still ringing, re-detected
       if (e.confidence < this.o.minConfidence) continue;
       const expected = nearest(ev.midis.filter((_, i) => !slot.heard[i]), m);
       slot.wrong.push({ event: this.cur, kind: "wrong", expected, played: m });
@@ -158,7 +160,6 @@ export class Follower {
       slot.closed = true;
       this.emit(this.cur, slot.wrong.length ? "bad" : "ok");
       this.cur++;
-      this.advancedAt = e.time;
       if (this.cur >= this.ex.events.length) this.done = true;
       else this.emit(this.cur, "current");
     } else {
